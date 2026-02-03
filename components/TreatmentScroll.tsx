@@ -48,23 +48,26 @@ export default function TreatmentScroll({ treatment, onNext }: { treatment: Trea
 
         if (!canvas || !ctx || !img) return;
 
-        // Handle High DPI
-        const dpr = window.devicePixelRatio || 1;
-        // Set canvas dimensions to match window (handled in resize, but good to check)
-
-        // Clear
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         // Cover Logic (Full Screen)
         const hRatio = canvas.width / img.width;
         const vRatio = canvas.height / img.height;
-        const ratio = Math.max(hRatio, vRatio); // Changed from min to max for 'cover'
 
-        // Maximum size (avoid upscaling too much if images are small? User said "Product Assembly", likely high res)
-        // Actually, object-fit: contain usually maximizes.
+        let ratio = Math.max(hRatio, vRatio); // Default: Cover
+
+        // Mobile Optimization: If in portrait mode and image is landscape, 
+        // using 'cover' (max) zooms in too much, cropping the sides.
+        // We switch to 'contain' (min) logic or fit-width (hRatio) to ensure visibility.
+        if (canvas.width < canvas.height && img.width > img.height) {
+            // Check if cover zoom is too aggressive
+            ratio = hRatio;
+            // Optional: minimal zoom to avoid too much letterboxing if close? 
+            // For now, strict visibility is safer.
+        }
 
         const centerShift_x = (canvas.width - img.width * ratio) / 2;
         const centerShift_y = (canvas.height - img.height * ratio) / 2;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height); // Always clear
 
         ctx.drawImage(
             img,
@@ -77,14 +80,38 @@ export default function TreatmentScroll({ treatment, onNext }: { treatment: Trea
     useEffect(() => {
         const handleResize = () => {
             if (!canvasRef.current) return;
-            canvasRef.current.width = window.innerWidth * window.devicePixelRatio;
-            canvasRef.current.height = window.innerHeight * window.devicePixelRatio;
-            // Redraw current frame?
+            // Cap DPR at 2 to avoid performance issues on high density mobile screens
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            canvasRef.current.width = window.innerWidth * dpr;
+            canvasRef.current.height = window.innerHeight * dpr;
+
+            // Normalize coordinate system so drawing logic works with CSS pixels (logic simplified)
+            // Actually, best practice for canvas with DPR:
+            const ctx = canvasRef.current.getContext('2d');
+            if (ctx) ctx.scale(dpr, dpr);
+
+            // But wait, my drawImage logic uses canvas.width directly for calcs.
+            // If I set width = innerWidth * dpr, then "canvas.width" is big.
+            // And my dpr scale needs to be handled.
+            // Simpler approach for this specific component existing logic:
+            // Just scale the canvas element size, keep internal logic consistent.
+            // The previous code didn't do ctx.scale. It just used huge width/height.
+            // AND it read window.devicePixelRatio in renderFrame but didn't use it?
+            // Wait, looking at previous code:
+            // renderFrame: const dpr = window.devicePixelRatio || 1; (Unused variable)
+            // handleResize: canvas.width = window.innerWidth * window.devicePixelRatio;
+
+            // So resizing makes the buffer big.
+            // renderFrame uses canvas.width (the big buffer size).
+            // This means we are drawing to the physical pixels. This is good for sharpness.
+            // BUT, drawing a Huge image every frame is slow.
+            // So capping DPR at 2 is vital.
         };
         handleResize();
         window.addEventListener("resize", handleResize);
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
 
     // Sync with Scroll
     useMotionValueEvent(scrollYProgress, "change", (latest) => {

@@ -28,7 +28,7 @@ export default function TextOverlays({ treatment, progress }: TextOverlaysProps)
                 style={{ opacity: op1, y: y1 }}
                 className="absolute max-w-2xl text-center px-4"
             >
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
+                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
                     {treatment.section1.title}
                 </h2>
                 <p className="text-xl text-slate-600 font-light">
@@ -41,7 +41,7 @@ export default function TextOverlays({ treatment, progress }: TextOverlaysProps)
                 style={{ opacity: op2, y: y2 }}
                 className="absolute max-w-2xl text-center px-4"
             >
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
+                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
                     {treatment.section2.title}
                 </h2>
                 <p className="text-xl text-slate-600 font-light">
@@ -54,7 +54,7 @@ export default function TextOverlays({ treatment, progress }: TextOverlaysProps)
                 style={{ opacity: op3, y: y3 }}
                 className="absolute max-w-2xl text-center px-4"
             >
-                <h2 className="text-5xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
+                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter text-slate-900 mb-4 font-sans">
                     {treatment.section3.title}
                 </h2>
                 <p className="text-xl text-slate-600 font-light">
