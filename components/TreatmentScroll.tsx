@@ -52,18 +52,9 @@ export default function TreatmentScroll({ treatment, onNext }: { treatment: Trea
         const hRatio = canvas.width / img.width;
         const vRatio = canvas.height / img.height;
 
-        let ratio = Math.max(hRatio, vRatio); // Default: Cover
-
-        // Mobile Optimization: If in portrait mode and image is landscape, 
-        // using 'cover' (max) zooms in too much, cropping the sides.
-        // We switch to 'contain' (min) logic or fit-width (hRatio) to ensure visibility.
-        if (canvas.width < canvas.height && img.width > img.height) {
-            // Check if cover zoom is too aggressive
-            ratio = hRatio;
-            // Optional: minimal zoom to avoid too much letterboxing if close? 
-            // For now, strict visibility is safer.
-        }
-
+        // Universal Cover Logic
+        let ratio = Math.max(hRatio, vRatio);
+        // Ensures image fills the screen and is centered on both PC and Mobile.
         const centerShift_x = (canvas.width - img.width * ratio) / 2;
         const centerShift_y = (canvas.height - img.height * ratio) / 2;
 
@@ -88,7 +79,9 @@ export default function TreatmentScroll({ treatment, onNext }: { treatment: Trea
             // Normalize coordinate system so drawing logic works with CSS pixels (logic simplified)
             // Actually, best practice for canvas with DPR:
             const ctx = canvasRef.current.getContext('2d');
-            if (ctx) ctx.scale(dpr, dpr);
+            // if (ctx) ctx.scale(dpr, dpr); 
+            // NOTE: We do NOT scale here because our render loop calculates positions based on
+            // canvas.width (physical pixels). If we scale, we double-apply the sizing.
 
             // But wait, my drawImage logic uses canvas.width directly for calcs.
             // If I set width = innerWidth * dpr, then "canvas.width" is big.
